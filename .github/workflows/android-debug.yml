@@ -55,7 +55,13 @@ jobs:
           ./gradlew :app:testDebugUnitTest --no-daemon > tests.log 2>&1
           status=$?
           if [ $status -ne 0 ]; then
-            tail -n 25 tests.log | while IFS= read -r line; do
+            grep -aE "^\s*[A-Za-z0-9_.]+ > [A-Za-z0-9_]+ FAILED|ComparisonFailure|expected:" tests.log | head -n 20 | while IFS= read -r line; do
+              echo "::error file=tests.log::$line"
+            done
+            grep -aoE 'testcase name="[^"]*"|message="[^"]*"' app/build/test-results/testDebugUnitTest/*.xml 2>/dev/null | head -n 20 | while IFS= read -r line; do
+              echo "::error file=tests.log::$line"
+            done
+            tail -n 15 tests.log | while IFS= read -r line; do
               echo "::error file=tests.log::$line"
             done
             exit $status

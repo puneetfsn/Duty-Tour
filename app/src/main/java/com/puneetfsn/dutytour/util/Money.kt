@@ -2,42 +2,58 @@ package com.puneetfsn.dutytour.util
 
 import java.math.BigDecimal
 import java.math.RoundingMode
-import java.text.NumberFormat
-import java.util.Locale
 
 /**
  * All money lives as paise (Int) in the database and in model code.
  * Only this file knows how to turn that into text, and back again.
+ *
+ * Grouping is written out by hand instead of borrowed from `NumberFormat`:
+ * the JVM on a build server and the JVM inside a phone can disagree about
+ * Indian digit grouping, and a tour sheet must read the same everywhere.
  */
 object Money {
 
     const val SYMBOL = "₹"
 
-    private val indianNumbers: NumberFormat =
-        NumberFormat.getNumberInstance(Locale("en", "IN")).apply {
-            minimumFractionDigits = 2
-            maximumFractionDigits = 2
-        }
-
-    private val indianWholeNumbers: NumberFormat =
-        NumberFormat.getNumberInstance(Locale("en", "IN")).apply {
-            minimumFractionDigits = 0
-            maximumFractionDigits = 0
-        }
-
     /** ₹1,23,456.50 — the form used on screen and in the PDF. */
     fun format(paise: Int): String = SYMBOL + formatAmount(paise)
 
     /** 1,23,456.50 — amount only, for table cells that already show a ₹ header. */
-    fun formatAmount(paise: Int): String =
-        indianNumbers.format(BigDecimal.valueOf(paise.toLong(), 2))
+    fun formatAmount(paise: Int): String {
+        val negative = paise < 0
+        val absolute = kotlin.math.abs(paise.toLong())
+        val rupees = absolute / 100
+        val fraction = (absolute % 100).toInt()
+        val fractionText = if (fraction < 10) "0$fraction" else fraction.toString()
+        return (if (negative) "-" else "") + groupIndian(rupees.toString()) + "." + fractionText
+    }
 
-    /** 1,23,456 — for compact list rows. */
+    /** 1,23,456 — for compact list rows; drops ".00" but keeps real paise. */
     fun formatCompact(paise: Int): String {
-        val rupees = paise / 100
-        val hasPaise = paise % 100 != 0
-        return if (hasPaise) indianNumbers.format(BigDecimal.valueOf(paise.toLong(), 2))
-        else indianWholeNumbers.format(rupees)
+        return if (paise % 100 == 0) {
+            val negative = paise < 0
+            val rupees = kotlin.math.abs(paise.toLong()) / 100
+            (if (negative) "-" else "") + groupIndian(rupees.toString())
+        } else {
+            formatAmount(paise)
+        }
+    }
+
+    /**
+     * Indian grouping: the last three digits stay together, then every two digits.
+     * 1234567 -> 12,34,567
+     */
+    internal fun groupIndian(digits: String): String {
+        if (digits.length <= 3) return digits
+        val lastThree = digits.takeLast(3)
+        var rest = digits.dropLast(3)
+        val groups = ArrayList<String>()
+        while (rest.length > 2) {
+            groups.add(0, rest.takeLast(2))
+            rest = rest.dropLast(2)
+        }
+        if (rest.isNotEmpty()) groups.add(0, rest)
+        return groups.joinToString(",") + "," + lastThree
     }
 
     /**

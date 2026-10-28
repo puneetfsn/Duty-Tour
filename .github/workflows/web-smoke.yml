@@ -1,0 +1,37 @@
+name: Web app smoke test
+
+on:
+  push:
+    branches: [main, "arena/**"]
+    paths:
+      - "web/**"
+      - ".github/workflows/web-smoke.yml"
+  pull_request:
+    paths:
+      - "web/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install test tooling
+        run: npm ci
+
+      - name: Run smoke test
+        run: npm test
