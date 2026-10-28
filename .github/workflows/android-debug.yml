@@ -30,11 +30,34 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
+      # Build errors are echoed back as workflow annotations, so a failure is
+      # readable from the run summary without downloading the full log.
       - name: Build debug APK
-        run: ./gradlew :app:assembleDebug --no-daemon --stacktrace
+        run: |
+          set +e
+          ./gradlew :app:assembleDebug --no-daemon --stacktrace > build.log 2>&1
+          status=$?
+          if [ $status -ne 0 ]; then
+            echo "Gradle failed with exit code $status. Last 25 lines:"
+            tail -n 25 build.log | while IFS= read -r line; do
+              echo "::error file=build.log::$line"
+            done
+            exit $status
+          fi
+          tail -n 5 build.log
 
       - name: Run unit tests
-        run: ./gradlew :app:testDebugUnitTest --no-daemon
+        run: |
+          set +e
+          ./gradlew :app:testDebugUnitTest --no-daemon > tests.log 2>&1
+          status=$?
+          if [ $status -ne 0 ]; then
+            tail -n 25 tests.log | while IFS= read -r line; do
+              echo "::error file=tests.log::$line"
+            done
+            exit $status
+          fi
+          tail -n 5 tests.log
 
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
