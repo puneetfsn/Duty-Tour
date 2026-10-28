@@ -312,7 +312,7 @@ class TourPdfWriter {
 
     /** Trims to one line, ellipsising rather than overflowing a column. */
     private fun fit(text: String, paint: Paint, maxWidth: Float): String {
-        val clean = sanitize(text)
+        val clean = PdfContent.sanitize(text)
         if (paint.measureText(clean) <= maxWidth) return clean
         var cut = clean
         while (cut.length > 1 && paint.measureText("$cut…") > maxWidth) {
@@ -322,35 +322,6 @@ class TourPdfWriter {
     }
 
     /** Wraps at word boundaries, respecting deliberate line breaks. */
-    private fun wrap(text: String, paint: Paint, maxWidth: Float): List<String> {
-        val clean = sanitize(text).trim()
-        if (clean.isEmpty()) return emptyList()
-
-        val out = ArrayList<String>()
-        clean.split("\n").forEach { paragraph ->
-            if (paragraph.isBlank()) {
-                out.add("")
-                return@forEach
-            }
-            val line = StringBuilder()
-            paragraph.split(" ").forEach { word ->
-                val candidate = if (line.isEmpty()) word else "$line $word"
-                if (paint.measureText(candidate) <= maxWidth) {
-                    line.clear().append(candidate)
-                } else {
-                    if (line.isNotEmpty()) out.add(line.toString())
-                    line.clear().append(word)
-                }
-            }
-            if (line.isNotEmpty()) out.add(line.toString())
-        }
-        return out
-    }
-
-    /** Drops control characters that would upset a PDF text run. */
-    private fun sanitize(text: String): String = text
-        .replace("\r\n", "\n")
-        .replace("\r", "\n")
-        .replace("\t", "    ")
-        .filter { it == '\n' || it.code >= 0x20 }
+    private fun wrap(text: String, paint: Paint, maxWidth: Float): List<String> =
+        PdfContent.wrap(text, maxWidth) { candidate -> paint.measureText(candidate) }
 }

@@ -89,6 +89,34 @@ class PdfContentTest {
     }
 
     @Test
+    fun long_details_wrap_instead_of_overflowing() {
+        // A crude monospace-ish measure: 1 unit per character.
+        fun measure(text: String) = text.length.toFloat()
+        val sentence = "Reviewed the rework log with plant QA and shared the torque report on Monday"
+        val lines = PdfContent.wrap(sentence, 20f) { measure(it) }
+        assertTrue("expected several lines, got $lines", lines.size > 3)
+        assertTrue("a line overflowed its width: $lines", lines.all { measure(it) <= 20f })
+        assertTrue("words were split: $lines", lines.all { !it.startsWith(" ") && it == it.trim() })
+    }
+
+    @Test
+    fun deliberate_line_breaks_are_kept() {
+        val lines = PdfContent.wrap("First line\n\nSecond line", 200f) { it.length.toFloat() }
+        assertEquals(listOf("First line", "", "Second line"), lines)
+    }
+
+    @Test
+    fun blank_details_produce_no_lines() {
+        assertEquals(emptyList<String>(), PdfContent.wrap("   \n  ", 100f) { it.length.toFloat() })
+    }
+
+    @Test
+    fun control_characters_are_stripped() {
+        assertEquals("a b", PdfContent.sanitize("a\u0000\tb").replace("    ", " "))
+        assertEquals("one\ntwo", PdfContent.sanitize("one\r\ntwo"))
+    }
+
+    @Test
     fun file_name_is_safe_and_recognisable() {
         assertEquals("Duty-Tour-Jaipur-2024-10-04.pdf", PdfContent.fileName(full))
         val messy = full.copy(destination = "Sri Ganganagar / Plant #2")

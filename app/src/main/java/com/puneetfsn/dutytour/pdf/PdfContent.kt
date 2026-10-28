@@ -82,6 +82,47 @@ object PdfContent {
 
     private fun isoDate(epochDay: Long): String = Dates.fromEpochDay(epochDay).toString()
 
+    /**
+     * Wraps text to [maxWidth], one entry per printed line, at word boundaries
+     * and honouring deliberate line breaks. [measure] is the caller's own text
+     * measurement (a `Paint` on the phone), which keeps this testable off-device.
+     */
+    fun wrap(
+        text: String,
+        maxWidth: Float,
+        measure: (String) -> Float
+    ): List<String> {
+        val clean = sanitize(text).trim()
+        if (clean.isEmpty()) return emptyList()
+
+        val out = ArrayList<String>()
+        clean.split("\n").forEach { paragraph ->
+            if (paragraph.isBlank()) {
+                out.add("")
+                return@forEach
+            }
+            val line = StringBuilder()
+            paragraph.split(" ").forEach { word ->
+                val candidate = if (line.isEmpty()) word else "$line $word"
+                if (measure(candidate) <= maxWidth) {
+                    line.clear().append(candidate)
+                } else {
+                    if (line.isNotEmpty()) out.add(line.toString())
+                    line.clear().append(word)
+                }
+            }
+            if (line.isNotEmpty()) out.add(line.toString())
+        }
+        return out
+    }
+
+    /** Drops characters that would upset a PDF text run. */
+    fun sanitize(text: String): String = text
+        .replace("\r\n", "\n")
+        .replace("\r", "\n")
+        .replace("\t", "    ")
+        .filter { it == '\n' || it.code >= 0x20 }
+
     /** ₹1,20,000.00 — mirrors what the app shows on screen. */
     fun money(paise: Int): String = Money.format(paise)
 
