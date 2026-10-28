@@ -32,27 +32,53 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.puneetfsn.dutytour.data.COMPANY_NAME
 import com.puneetfsn.dutytour.data.Tour
 import com.puneetfsn.dutytour.ui.common.KeyValueRow
+import com.puneetfsn.dutytour.ui.export.rememberPdfExporter
 import com.puneetfsn.dutytour.ui.common.QuietDivider
 import com.puneetfsn.dutytour.ui.common.SectionLabel
 import com.puneetfsn.dutytour.util.Dates
 import com.puneetfsn.dutytour.util.Money
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TourDetailScreen(
     viewModel: TourDetailViewModel,
     onBack: () -> Unit,
-    onEdit: () -> Unit
+    onEdit: () -> Unit,
+    onOpenExport: () -> Unit
 ) {
     val tour by viewModel.tour.collectAsStateWithLifecycle()
     var confirmDelete by remember { mutableStateOf(false) }
+
+    val exporter = rememberPdfExporter()
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var exporting by remember { mutableStateOf(false) }
+    var exportError by remember { mutableStateOf<String?>(null) }
+
+    // Build the file off the main thread, then hand it to the share sheet.
+    fun export(action: suspend () -> java.io.File) {
+        if (exporting) return
+        exporting = true
+        exportError = null
+        scope.launch {
+            runCatching { action() }
+                .onSuccess { file -> exporter.share(file, context) }
+                .onFailure { problem ->
+                    exportError = problem.message ?: "Could not build the PDF."
+                }
+            exporting = false
+        }
+    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -147,9 +173,16 @@ fun TourDetailScreen(
                     value = Money.format(current.hotelAmountPaise)
                 )
             }
+            if (current.hasWorkCharge) {
+                KeyValueRow(
+                    label = if (current.workTitle.isBlank()) "Work charged"
+                    else "Work charged — ${current.workTitle}",
+                    value = Money.format(current.workAmountPaise)
+                )
+            }
             if (current.otherAmountPaise > 0) {
                 KeyValueRow(
-                    label = if (current.otherNote.isBlank()) "Other" else "Other — ${current.otherNote}",
+                    label = if (current.otherNote.isBlank()) "Others" else "Others — ${current.otherNote}",
                     value = Money.format(current.otherAmountPaise)
                 )
             }
@@ -179,8 +212,6 @@ fun TourDetailScreen(
 
             Spacer(Modifier.height(24.dp))
 
-            // PDF wiring lands in the next step; the button is visible so the
-            // placement is settled, and disabled so nothing half-works.
             Card(
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surfaceVariant
@@ -190,15 +221,37 @@ fun TourDetailScreen(
                     Text("PDF", style = MaterialTheme.typography.titleSmall)
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        text = "Exporting this tour as a printable A4 PDF is the next step " +
-                            "(with the $COMPANY_NAME watermark).",
+                        text = "A printable A4 sheet, built on this phone. The watermark " +
+                            "wording is yours to set in Settings, or clear it for none.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(Modifier.height(12.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Button(onClick = {}, enabled = false) { Text("Export this tour") }
-                        OutlinedButton(onClick = {}, enabled = false) { Text("Export all") }
+                        Button(
+                            onClick = { export { exporter.exportSingle(current) } },
+                            enabled = !exporting
+                        ) {
+                            Text(if (exporting) "Building…" else "Export this tour")
+                        }
+                        OutlinedButton(
+                            onClick = { export { exporter.exportAll() } },
+                            enabled = !exporting
+                        ) {
+                            Text("Export all")
+                        }
+                    }
+                    Spacer(Modifier.height(8.dp))
+                    TextButton(onClick = onOpenExport, enabled = !exporting) {
+                        Text("More export options")
+                    }
+                    exportError?.let { message ->
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            text = message,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error
+                        )
                     }
                 }
             }

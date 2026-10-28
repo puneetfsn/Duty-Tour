@@ -31,6 +31,10 @@ class SettingsViewModel(
         repository.setWatermarkEnabled(enabled)
     }
 
+    fun setWatermarkText(text: String) = viewModelScope.launch {
+        repository.setWatermarkText(text)
+    }
+
     companion object {
         fun factory(repository: SettingsRepository): ViewModelProvider.Factory =
             viewModelFactory { initializer { SettingsViewModel(repository) } }

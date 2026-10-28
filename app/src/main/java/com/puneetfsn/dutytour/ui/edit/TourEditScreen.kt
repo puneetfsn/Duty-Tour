@@ -264,6 +264,17 @@ fun TourEditScreen(
                 minLines = 4,
                 modifier = Modifier.fillMaxWidth()
             )
+            Spacer(Modifier.height(12.dp))
+            AmountField(
+                value = form.workAmount,
+                onValueChange = { value -> viewModel.update { it.copy(workAmount = value) } },
+                label = "Work charged amount"
+            )
+            Text(
+                text = "Charged for this work. Added to the total as its own line on the PDF.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
 
             if (error != null) {
                 Spacer(Modifier.height(12.dp))
@@ -338,9 +349,10 @@ private fun Long?.orZero(): Long = this ?: 0L
 @Composable
 private fun LiveTotal(form: TourForm) {
     Column(modifier = Modifier.padding(vertical = 4.dp)) {
-        TotalRow("Travel", form.travelPaise)
-        TotalRow("Hotel", form.hotelPaise)
-        TotalRow("Other", form.otherPaise)
+        TotalRow("Travel cost", form.travelPaise)
+        TotalRow("Hotel cost", form.hotelPaise)
+        TotalRow("Work charged", form.workPaise)
+        TotalRow("Others", form.otherPaise)
         HorizontalDivider(
             modifier = Modifier.padding(vertical = 6.dp),
             color = MaterialTheme.colorScheme.outline

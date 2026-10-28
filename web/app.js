@@ -12,6 +12,7 @@
 
   var COMPANY = 'Hendrickson';
   var CURRENCY = '₹';
+  var DEFAULT_WATERMARK = COMPANY;
   var STORE_TOURS = 'duty-tour:v1:tours';
   var STORE_SETTINGS = 'duty-tour:v1:settings';
   var TRAVEL_MODES = ['Train', 'Bus', 'Cab', 'Flight', 'Other'];
@@ -44,7 +45,9 @@
     return {
       travellerName: typeof raw.travellerName === 'string' ? raw.travellerName : '',
       defaultCity: typeof raw.defaultCity === 'string' ? raw.defaultCity : '',
-      watermark: raw.watermark !== false
+      watermark: raw.watermark !== false,
+      // Custom watermark text. Empty means "print no watermark at all".
+      watermarkText: typeof raw.watermarkText === 'string' ? raw.watermarkText : DEFAULT_WATERMARK
     };
   }
 
@@ -65,6 +68,7 @@
       hotelName: str(raw.hotelName),
       hotelNights: int(raw.hotelNights),
       hotelAmount: int(raw.hotelAmount),
+      workAmount: int(raw.workAmount),
       otherAmount: int(raw.otherAmount),
       otherNote: str(raw.otherNote),
       workTitle: str(raw.workTitle),
@@ -107,8 +111,10 @@
     });
   }
 
+  /** Travel + hotel + work charged + other. One number, four buckets, no hidden extras. */
   function totalOf(tour) {
-    return (tour.travelAmount || 0) + (tour.hotelAmount || 0) + (tour.otherAmount || 0);
+    return (tour.travelAmount || 0) + (tour.hotelAmount || 0) +
+      (tour.workAmount || 0) + (tour.otherAmount || 0);
   }
 
   // -------------------------------------------------------------------- money
@@ -396,6 +402,10 @@
             '<label for="workDetails">Details</label>' +
             '<textarea id="workDetails" name="workDetails" rows="5">' + esc(d.workDetails) + '</textarea>' +
           '</div>' +
+          '<div class="grid-money">' +
+            field('workAmount', 'Work charged amount', d.workAmountText, 'text',
+              'Charged for this work. Added to the total as its own line.') +
+          '</div>' +
         '</div>' +
 
         '<div class="section">' +
@@ -432,12 +442,15 @@
   function totalsMarkup(d) {
     var travel = parsePaise(d.travelAmountText);
     var hotel = parsePaise(d.hotelAmountText);
+    var work = parsePaise(d.workAmountText);
     var other = parsePaise(d.otherAmountText);
     return '' +
-      line('Travel', travel) +
-      line('Hotel', hotel) +
-      line('Other', other) +
-      '<div class="total-line grand"><span>Total</span><span>' + money(travel + hotel + other) + '</span></div>';
+      line('Travel cost', travel) +
+      line('Hotel cost', hotel) +
+      line('Work charged', work) +
+      line('Others', other) +
+      '<div class="total-line grand"><span>Total</span><span>' +
+        money(travel + hotel + work + other) + '</span></div>';
 
     function line(label, paise) {
       return '<div class="total-line"><span>' + label + '</span><span>' + money(paise) + '</span></div>';
@@ -447,6 +460,7 @@
   function draftTotal() {
     return parsePaise(draft.travelAmountText) +
       parsePaise(draft.hotelAmountText) +
+      parsePaise(draft.workAmountText) +
       parsePaise(draft.otherAmountText);
   }
 
@@ -461,7 +475,8 @@
         (t.hotelNights ? ' (' + t.hotelNights + (t.hotelNights === 1 ? ' night' : ' nights') + ')' : '');
       rows += kv(hotelLabel, money(t.hotelAmount), '');
     }
-    if (t.otherAmount) rows += kv('Other' + (t.otherNote ? ' — ' + esc(t.otherNote) : ''), money(t.otherAmount), '');
+    if (t.workAmount) rows += kv('Work charged', money(t.workAmount), '');
+    if (t.otherAmount) rows += kv('Others' + (t.otherNote ? ' — ' + esc(t.otherNote) : ''), money(t.otherAmount), '');
     rows += '<div class="kv total"><span class="k">Total</span><span class="v">' + money(totalOf(t)) + '</span></div>';
 
     var work = (t.workTitle || t.workDetails)
@@ -509,6 +524,13 @@
       '</span><span class="v">' + value + '</span></div>';
   }
 
+  /** One honest sentence about what the watermark will do on this sheet. */
+  function watermarkNote() {
+    var text = (settings.watermarkText || '').trim();
+    if (!settings.watermark || !text) return 'No watermark will be printed.';
+    return 'Watermark: “' + esc(text) + '”.';
+  }
+
   function viewExport() {
     var list = sortedTours();
     var options = list.map(function (t) {
@@ -531,7 +553,7 @@
       '<div class="page-head">' +
         '<div>' +
           '<h2 class="page-title">Export</h2>' +
-          '<p class="page-note">A4 sheets with the ' + COMPANY + ' watermark. Use your browser’s print dialog and choose <strong>Save as PDF</strong>.</p>' +
+          '<p class="page-note">A4 sheets. ' + watermarkNote() + ' Use your browser’s print dialog and choose <strong>Save as PDF</strong>.</p>' +
         '</div>' +
       '</div>' +
 
@@ -624,9 +646,14 @@
         '<div class="switch-row">' +
           '<div class="switch-text">' +
             '<strong>Diagonal watermark</strong>' +
-            '<small>A light “' + COMPANY + '” across each printed sheet. A style choice — not proof of anything.</small>' +
+            '<small>A light word across each printed sheet. Your choice of wording — leave the box empty for no watermark at all.</small>' +
           '</div>' +
           '<label class="checkbox-row"><input type="checkbox" id="watermark" ' + (settings.watermark ? 'checked' : '') + ' /> <span>Show</span></label>' +
+        '</div>' +
+        '<div class="field" style="margin-top:14px;max-width:420px">' +
+          '<label for="watermarkText">Watermark text</label>' +
+          '<input id="watermarkText" type="text" autocomplete="off" maxlength="40" value="' + esc(settings.watermarkText) + '" placeholder="Leave blank for none" />' +
+          '<span class="hint">Blank means no watermark. Saved with the button above.</span>' +
         '</div>' +
       '</div>' +
 
@@ -677,6 +704,7 @@
         hotelName: existing.hotelName,
         hotelNightsText: existing.hotelNights ? String(existing.hotelNights) : '',
         hotelAmountText: editableAmount(existing.hotelAmount),
+        workAmountText: editableAmount(existing.workAmount),
         otherAmountText: editableAmount(existing.otherAmount),
         otherNote: existing.otherNote,
         workTitle: existing.workTitle,
@@ -699,6 +727,7 @@
       hotelName: '',
       hotelNightsText: '',
       hotelAmountText: '',
+      workAmountText: '',
       otherAmountText: '',
       otherNote: '',
       workTitle: '',
@@ -736,6 +765,7 @@
       hotelName: d.hotelName.trim(),
       hotelNights: Number(d.hotelNightsText) || 0,
       hotelAmount: parsePaise(d.hotelAmountText),
+      workAmount: parsePaise(d.workAmountText),
       otherAmount: parsePaise(d.otherAmountText),
       otherNote: d.otherNote.trim(),
       workTitle: d.workTitle.trim(),
@@ -805,7 +835,7 @@
       });
     });
 
-    ['travelAmount', 'hotelAmount', 'otherAmount'].forEach(function (name) {
+    ['travelAmount', 'hotelAmount', 'workAmount', 'otherAmount'].forEach(function (name) {
       var el = form.elements[name];
       if (!el) return;
       el.addEventListener('input', function () {
@@ -906,6 +936,8 @@
     if (save) save.addEventListener('click', function () {
       settings.travellerName = (document.getElementById('travellerName').value || '').trim();
       settings.defaultCity = (document.getElementById('defaultCity').value || '').trim();
+      var markText = document.getElementById('watermarkText');
+      if (markText) settings.watermarkText = (markText.value || '').trim();
       saveSettings();
       updateNameBanner();
       toast('Settings saved');
@@ -1010,9 +1042,18 @@
     }, 1500);
   }
 
+  /**
+   * The diagonal mark is optional and its wording is the traveller's.
+   * Toggle off, or clear the text, and the sheet prints with no watermark.
+   */
   function watermarkMarkup() {
     if (!settings.watermark) return '';
-    return '<div class="sheet-watermark"><span>' + esc(COMPANY) + '</span></div>';
+    var text = (settings.watermarkText || '').trim();
+    if (!text) return '';
+    // Long wording shrinks so it still fits across the page.
+    var size = Math.max(22, Math.min(84, Math.round(980 / text.length)));
+    return '<div class="sheet-watermark"><span style="font-size:' + size +
+      'pt">' + esc(text) + '</span></div>';
   }
 
   function tourSheet(tour) {
@@ -1020,7 +1061,7 @@
     var rows = '';
 
     rows += '<tr>' +
-      '<td>Travel</td>' +
+      '<td>Travel cost</td>' +
       '<td class="muted">' + esc(tour.travelMode) + (tour.travelNote ? ' · ' + esc(tour.travelNote) : '') + '</td>' +
       '<td class="num">' + amount(tour.travelAmount) + '</td>' +
       '</tr>';
@@ -1030,15 +1071,23 @@
       if (tour.hotelName) hotelDetail.push(tour.hotelName);
       if (tour.hotelNights) hotelDetail.push(tour.hotelNights + (tour.hotelNights === 1 ? ' night' : ' nights'));
       rows += '<tr>' +
-        '<td>Hotel</td>' +
+        '<td>Hotel cost</td>' +
         '<td class="muted">' + esc(hotelDetail.join(' · ') || '—') + '</td>' +
         '<td class="num">' + amount(tour.hotelAmount) + '</td>' +
         '</tr>';
     }
 
+    if (tour.workAmount) {
+      rows += '<tr>' +
+        '<td>Work charged</td>' +
+        '<td class="muted">' + esc(tour.workTitle || '—') + '</td>' +
+        '<td class="num">' + amount(tour.workAmount) + '</td>' +
+        '</tr>';
+    }
+
     if (tour.otherAmount) {
       rows += '<tr>' +
-        '<td>Other</td>' +
+        '<td>Others</td>' +
         '<td class="muted">' + esc(tour.otherNote || '—') + '</td>' +
         '<td class="num">' + amount(tour.otherAmount) + '</td>' +
         '</tr>';

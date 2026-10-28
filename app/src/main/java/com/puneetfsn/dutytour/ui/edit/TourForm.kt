@@ -21,6 +21,7 @@ data class TourForm(
     val hotelName: String = "",
     val hotelNights: String = "",
     val hotelAmount: String = "",
+    val workAmount: String = "",
     val otherAmount: String = "",
     val otherNote: String = "",
     val workTitle: String = "",
@@ -30,8 +31,9 @@ data class TourForm(
 ) {
     val travelPaise: Int get() = Money.parseToPaise(travelAmount)
     val hotelPaise: Int get() = Money.parseToPaise(hotelAmount)
+    val workPaise: Int get() = Money.parseToPaise(workAmount)
     val otherPaise: Int get() = Money.parseToPaise(otherAmount)
-    val totalPaise: Int get() = travelPaise + hotelPaise + otherPaise
+    val totalPaise: Int get() = travelPaise + hotelPaise + workPaise + otherPaise
 
     val nights: Int get() = hotelNights.toIntOrNull() ?: 0
 
@@ -47,6 +49,7 @@ data class TourForm(
         hotelName = hotelName.trim(),
         hotelNights = nights,
         hotelAmountPaise = hotelPaise,
+        workAmountPaise = workPaise,
         otherAmountPaise = otherPaise,
         otherNote = otherNote.trim(),
         workTitle = workTitle.trim(),
@@ -68,6 +71,7 @@ data class TourForm(
             hotelName = tour.hotelName,
             hotelNights = if (tour.hotelNights > 0) tour.hotelNights.toString() else "",
             hotelAmount = Money.toEditableString(tour.hotelAmountPaise),
+            workAmount = Money.toEditableString(tour.workAmountPaise),
             otherAmount = Money.toEditableString(tour.otherAmountPaise),
             otherNote = tour.otherNote,
             workTitle = tour.workTitle,

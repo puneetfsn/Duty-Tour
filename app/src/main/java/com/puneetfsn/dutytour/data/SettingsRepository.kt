@@ -17,7 +17,12 @@ data class AppSettings(
     val travellerName: String = "",
     val defaultCity: String = "",
     val currencySymbol: String = "₹",
-    val watermarkEnabled: Boolean = true
+    val watermarkEnabled: Boolean = false,
+    /**
+     * Wording of the diagonal mark. Editable, so it is not a permanent company
+     * stamp; blank it out and the sheet prints with no watermark at all.
+     */
+    val watermarkText: String = COMPANY_NAME
 )
 
 private val Context.settingsDataStore: DataStore<Preferences> by preferencesDataStore(
@@ -30,6 +35,7 @@ class SettingsRepository(private val context: Context) {
         val travellerName = stringPreferencesKey("traveller_name")
         val defaultCity = stringPreferencesKey("default_city")
         val watermark = booleanPreferencesKey("watermark_enabled")
+        val watermarkText = stringPreferencesKey("watermark_text")
     }
 
     val settings: Flow<AppSettings> = context.settingsDataStore.data.map { prefs ->
@@ -37,7 +43,8 @@ class SettingsRepository(private val context: Context) {
             travellerName = prefs[Keys.travellerName].orEmpty(),
             defaultCity = prefs[Keys.defaultCity].orEmpty(),
             currencySymbol = "₹",
-            watermarkEnabled = prefs[Keys.watermark] ?: true
+            watermarkEnabled = prefs[Keys.watermark] ?: false,
+            watermarkText = prefs[Keys.watermarkText] ?: COMPANY_NAME
         )
     }
 
@@ -51,5 +58,9 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setWatermarkEnabled(enabled: Boolean) {
         context.settingsDataStore.edit { it[Keys.watermark] = enabled }
+    }
+
+    suspend fun setWatermarkText(text: String) {
+        context.settingsDataStore.edit { it[Keys.watermarkText] = text.trim().take(40) }
     }
 }

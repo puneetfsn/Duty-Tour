@@ -43,6 +43,9 @@ data class Tour(
     val hotelNights: Int = 0,
     val hotelAmountPaise: Int = 0,
 
+    // Work charged (what this tour was billed for)
+    val workAmountPaise: Int = 0,
+
     // Other spend (optional)
     val otherAmountPaise: Int = 0,
     val otherNote: String = "",
@@ -58,9 +61,16 @@ data class Tour(
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis()
 ) {
-    /** Travel + hotel + other. Never stored, always computed. */
+    /**
+     * Travel + hotel + work charged + other. Never stored, always computed,
+     * so the four lines on a PDF can never disagree with the total beside them.
+     */
     val totalPaise: Int
-        get() = travelAmountPaise + hotelAmountPaise + otherAmountPaise
+        get() = travelAmountPaise + hotelAmountPaise + workAmountPaise + otherAmountPaise
+
+    /** True when there is a work charge to show as its own line. */
+    val hasWorkCharge: Boolean
+        get() = workAmountPaise > 0
 
     /** True when the tour has a hotel stay to show. */
     val hasHotel: Boolean

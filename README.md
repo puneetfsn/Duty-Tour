@@ -2,8 +2,11 @@
 
 A private, on-device **duty tour log** for one traveller at Hendrickson.
 
-Each duty tour is one sitting: route, dates, what was spent (travel / hotel / other), the total,
-and what work was done. Export it as a printable PDF to send to accounts.
+Each duty tour is one sitting: route, dates, what was spent (**travel / hotel / work charged /
+other**), the total, and what work was done. Export it as a printable PDF to send to accounts.
+
+The PDF is a slip accounts can approve: four clearly named cost lines — **Travel cost, Hotel cost,
+Work charged, Others** — then one total.
 
 This is not SAP and not a team app. It is a tour file that happens to fit in a phone.
 
@@ -30,8 +33,10 @@ The watermark is a style choice. It is **not** verification that anything is off
 1. **Tours** — route, dates, total. Quiet list, one row per tour.
 2. **Add / edit tour** — totals update live as amounts are typed.
 3. **Tour detail** — the full record.
-4. **Export** — single tour, all tours, or by date range. *(next step)*
-5. **Settings** — traveller name, company, default city, currency ₹, watermark on/off.
+5. **Export** — single tour, all tours (one sheet per tour), or by date range. Builds the PDF on
+   the phone and opens the system share sheet.
+6. **Settings** — traveller name, company, default city, currency ₹, watermark on/off, and the
+   watermark's own wording.
 
 ### Data model
 
@@ -44,11 +49,14 @@ The watermark is a style choice. It is **not** verification that anything is off
 | `travelMode` | enum | Train / Bus / Cab / Flight / Other |
 | `travelAmountPaise`, `travelNote` | `Int`, `String` | Money in **paise** |
 | `hotelName`, `hotelNights`, `hotelAmountPaise` | | All optional |
+| `workAmountPaise` | `Int` | Work charged, a line of its own on the PDF |
 | `otherAmountPaise`, `otherNote` | | Optional |
 | `workTitle`, `workDetails` | `String` | What was done |
 | `purposeLine` | `String` | Client / office / purpose, optional |
 
-**Total is never stored.** `Tour.totalPaise` is computed as travel + hotel + other, so it can't drift.
+**Total is never stored.** `Tour.totalPaise` is computed as travel + hotel + work charged + other,
+so the printed lines can never disagree with the printed total. Room v2 adds `workAmountPaise` with a
+real migration, so tours recorded before the change keep their data.
 
 Money is an `Int` of paise end to end; `util/Money.kt` is the only place that formats or parses it.
 Dates are stored as epoch days so range filters are exact; `startDate`/`endDate` queries drive exports.
@@ -138,14 +146,23 @@ Upload the contents of `web/` (or just drag `duty-tour.html`) to Netlify Drop,
 Cloudflare Pages, or any static host. Nothing server-side is required, and no data
 is ever sent anywhere — the app is client-side only.
 
+## The PDF
+
+- A4, portrait, drawn with the platform's own `android.graphics.pdf.PdfDocument` — no PDF library.
+- Title **DUTY TOUR**, company line **Hendrickson**, route, dates, traveller, purpose.
+- Spend table: **Travel cost · Hotel cost · Work charged · Others**, then **Total**.
+- Work done (title and details, wrapped and continued onto a follow-up sheet if long).
+- Footer: *Personal duty-tour record. Not a GST invoice.*
+- **Watermark is optional and editable.** Off by default. When on, it prints the wording you set in
+  Settings (`Hendrickson` until you change it); clear the field and the sheet prints with no
+  watermark at all. It is a style choice, never a claim of verification.
+- Shared through `FileProvider` from the app cache, so only the file you pick leaves the phone.
+
 ## Status
 
-Done: project scaffold, Room `Tour` entity + DAO, list / add-edit / detail / settings screens,
-live totals, CI debug APK, and the web app.
-
-**Next, after your confirmation:** native `PdfDocument` export on Android — single tour, all tours,
-and date range — with the diagonal `Hendrickson` watermark and `FileProvider` sharing. The detail
-screen has the button placement reserved and disabled until then.
+Done: Room `Tour` (+ `workAmountPaise`, migration), list / add-edit / detail / export / settings,
+live totals with four cost heads, native PDF export (single / all / date range) with share sheet,
+CI debug APK, and the web app with the same fields and print-to-PDF.
 
 ## Layout
 

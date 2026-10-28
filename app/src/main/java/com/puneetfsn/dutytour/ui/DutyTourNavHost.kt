@@ -13,6 +13,9 @@ import com.puneetfsn.dutytour.ui.detail.TourDetailScreen
 import com.puneetfsn.dutytour.ui.detail.TourDetailViewModel
 import com.puneetfsn.dutytour.ui.edit.TourEditScreen
 import com.puneetfsn.dutytour.ui.edit.TourEditViewModel
+import com.puneetfsn.dutytour.ui.export.ExportScreen
+import com.puneetfsn.dutytour.ui.export.ExportViewModel
+import com.puneetfsn.dutytour.ui.export.rememberPdfExporter
 import com.puneetfsn.dutytour.ui.list.TourListScreen
 import com.puneetfsn.dutytour.ui.list.TourListViewModel
 import com.puneetfsn.dutytour.ui.settings.SettingsScreen
@@ -25,6 +28,7 @@ object Routes {
     // mistaken for "tour/{tourId}" by the navigation matcher.
     const val EDIT = "tour-edit?tourId={tourId}"
     const val SETTINGS = "settings"
+    const val EXPORT = "export"
 
     fun detail(tourId: Long) = "tour/$tourId"
     fun edit(tourId: Long?) = "tour-edit?tourId=${tourId ?: -1L}"
@@ -43,7 +47,8 @@ fun DutyTourNavHost() {
                 viewModel = vm,
                 onAddTour = { navController.navigate(Routes.edit(null)) },
                 onOpenTour = { id -> navController.navigate(Routes.detail(id)) },
-                onOpenSettings = { navController.navigate(Routes.SETTINGS) }
+                onOpenSettings = { navController.navigate(Routes.SETTINGS) },
+                onOpenExport = { navController.navigate(Routes.EXPORT) }
             )
         }
 
@@ -84,8 +89,17 @@ fun DutyTourNavHost() {
             TourDetailScreen(
                 viewModel = vm,
                 onBack = { navController.popBackStack() },
-                onEdit = { navController.navigate(Routes.edit(tourId)) }
+                onEdit = { navController.navigate(Routes.edit(tourId)) },
+                onOpenExport = { navController.navigate(Routes.EXPORT) }
             )
+        }
+
+        composable(Routes.EXPORT) {
+            val exporter = rememberPdfExporter()
+            val vm: ExportViewModel = viewModel(
+                factory = ExportViewModel.factory(exporter, app.tourRepository)
+            )
+            ExportScreen(viewModel = vm, onBack = { navController.popBackStack() })
         }
 
         composable(Routes.SETTINGS) {

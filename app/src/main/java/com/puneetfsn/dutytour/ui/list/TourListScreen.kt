@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -44,7 +45,8 @@ fun TourListScreen(
     viewModel: TourListViewModel,
     onAddTour: () -> Unit,
     onOpenTour: (Long) -> Unit,
-    onOpenSettings: () -> Unit
+    onOpenSettings: () -> Unit,
+    onOpenExport: () -> Unit
 ) {
     val tours by viewModel.tours.collectAsStateWithLifecycle()
 
@@ -70,6 +72,9 @@ fun TourListScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 AppMasthead(modifier = Modifier.weight(1f))
+                IconButton(onClick = onOpenExport, enabled = tours.isNotEmpty()) {
+                    Icon(Icons.Filled.Share, contentDescription = "Export tours")
+                }
                 IconButton(onClick = onOpenSettings) {
                     Icon(Icons.Filled.Settings, contentDescription = "Settings")
                 }

@@ -49,14 +49,24 @@ class MoneyTest {
     }
 
     @Test
-    fun total_is_computed_from_three_buckets() {
+    fun total_is_computed_from_four_buckets() {
         val tour = Tour(
             travelMode = TravelMode.TRAIN,
             travelAmountPaise = 120050,
             hotelAmountPaise = 250000,
+            workAmountPaise = 500000,
             otherAmountPaise = 4500
         )
-        assertEquals(374550, tour.totalPaise)
+        assertEquals(874550, tour.totalPaise)
+    }
+
+    @Test
+    fun work_charge_counts_towards_the_total() {
+        val withoutWork = Tour(travelAmountPaise = 100000, otherAmountPaise = 5000)
+        val withWork = withoutWork.copy(workAmountPaise = 250000)
+        assertEquals(105000, withoutWork.totalPaise)
+        assertEquals(355000, withWork.totalPaise)
+        assertEquals(250000, withWork.totalPaise - withoutWork.totalPaise)
     }
 
     @Test

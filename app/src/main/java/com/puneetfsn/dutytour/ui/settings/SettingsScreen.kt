@@ -47,6 +47,7 @@ fun SettingsScreen(
 
     var travellerName by remember { mutableStateOf("") }
     var defaultCity by remember { mutableStateOf("") }
+    var watermarkText by remember { mutableStateOf("") }
     var loaded by remember { mutableStateOf(false) }
 
     // Fill the fields once, from what is stored; after that the user owns the text.
@@ -54,6 +55,7 @@ fun SettingsScreen(
         if (!loaded) {
             travellerName = settings.travellerName
             defaultCity = settings.defaultCity
+            watermarkText = settings.watermarkText
             loaded = true
         }
     }
@@ -72,6 +74,7 @@ fun SettingsScreen(
                     TextButton(onClick = {
                         viewModel.setTravellerName(travellerName)
                         viewModel.setDefaultCity(defaultCity)
+                        viewModel.setWatermarkText(watermarkText)
                     }) { Text("Save") }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -125,8 +128,8 @@ fun SettingsScreen(
                 Column(modifier = Modifier.weight(1f)) {
                     Text("Watermark", style = MaterialTheme.typography.bodyLarge)
                     Text(
-                        text = "Diagonal \"$COMPANY_NAME\" across each page. A style choice, " +
-                            "not proof of anything.",
+                        text = "A light word across each printed page. Off by default; " +
+                            "your wording, and clearing the text prints a clean sheet.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -136,6 +139,16 @@ fun SettingsScreen(
                     onCheckedChange = { viewModel.setWatermark(it) }
                 )
             }
+            Spacer(Modifier.height(12.dp))
+            OutlinedTextField(
+                value = watermarkText,
+                onValueChange = { watermarkText = it.take(40) },
+                label = { Text("Watermark text") },
+                singleLine = true,
+                enabled = settings.watermarkEnabled,
+                supportingText = { Text("Blank means no watermark. Saved with Save above.") },
+                modifier = Modifier.fillMaxWidth()
+            )
 
             QuietDivider()
 
