@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="description" content="Duty Tour — a private, on-device tour log for Hendrickson." />
+  <title>Duty Tour — Hendrickson</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <a class="skip no-print" href="#app">Skip to content</a>
+
+  <header class="topbar no-print">
+    <div class="brand">
+      <h1 class="brand-title">Duty Tour</h1>
+      <p class="brand-sub" id="brand-sub">Hendrickson</p>
+    </div>
+    <nav class="tabs" aria-label="Sections">
+      <a href="#/tours" data-tab="tours">Tours</a>
+      <a href="#/export" data-tab="export">Export</a>
+      <a href="#/settings" data-tab="settings">Settings</a>
+    </nav>
+  </header>
+
+  <div id="name-banner" class="banner no-print" hidden>
+    <span>Your name is printed on every PDF.</span>
+    <a href="#/settings" class="banner-link">Add name</a>
+  </div>
+
+  <main id="app" class="app no-print" tabindex="-1"></main>
+
+  <footer class="footer no-print">
+    <p>Private, on this device. No account, no cloud, no analytics, no ads.</p>
+    <p class="footer-quiet">Amounts and place names only. Duty Tour never asks for bank passwords, UPI PINs, card CVV, or OTPs.</p>
+  </footer>
+
+  <!-- Filled at print time, with one A4 sheet per tour. -->
+  <div id="print-root" aria-hidden="true"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

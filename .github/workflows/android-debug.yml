@@ -1,0 +1,94 @@
+name: Android debug APK
+
+on:
+  push:
+    branches: [main, "arena/**"]
+    paths-ignore:
+      - "web/**"
+      - "**.md"
+  pull_request:
+    paths-ignore:
+      - "web/**"
+      - "**.md"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      # Build errors are echoed back as workflow annotations, so a failure is
+      # readable from the run summary without downloading the full log.
+      - name: Build debug APK
+        run: |
+          set +e
+          ./gradlew :app:assembleDebug --no-daemon > build.log 2>&1
+          status=$?
+          if [ $status -ne 0 ]; then
+            echo "Gradle failed with exit code $status."
+            # Compiler errors first: they are the lines worth reading.
+            grep -aE "^(e:|error:|FAILURE:)" build.log | head -n 40
+            echo "--- context ---"
+            awk '/\* What went wrong:/{flag=1} flag{print; n++} n>12{exit}' build.log
+            if [ -n "$GH_TOKEN" ] && [ -n "$PR_NUMBER" ]; then
+              {
+                echo '### Android build failed'
+                echo '```'
+                grep -aE "^(e:|error:)" build.log | head -n 40
+                echo '```'
+                echo '<details><summary>What went wrong</summary>'
+                echo
+                echo '```'
+                awk '/\* What went wrong:/{flag=1} flag{print; n++} n>25{exit}' build.log
+                echo '```'
+                echo '</details>'
+              } > comment.md
+              gh pr comment "$PR_NUMBER" --body-file comment.md || true
+            fi
+            exit $status
+          fi
+          tail -n 5 build.log
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+
+      - name: Run unit tests
+        run: |
+          set +e
+          ./gradlew :app:testDebugUnitTest --no-daemon > tests.log 2>&1
+          status=$?
+          if [ $status -ne 0 ]; then
+            grep -aE "^\s*[A-Za-z0-9_.]+ > [A-Za-z0-9_]+ FAILED|ComparisonFailure|expected:" tests.log | head -n 20 | while IFS= read -r line; do
+              echo "::error file=tests.log::$line"
+            done
+            grep -aoE 'testcase name="[^"]*"|message="[^"]*"' app/build/test-results/testDebugUnitTest/*.xml 2>/dev/null | head -n 20 | while IFS= read -r line; do
+              echo "::error file=tests.log::$line"
+            done
+            tail -n 15 tests.log | while IFS= read -r line; do
+              echo "::error file=tests.log::$line"
+            done
+            exit $status
+          fi
+          tail -n 5 tests.log
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: duty-tour-debug-apk
+          path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+          retention-days: 30
