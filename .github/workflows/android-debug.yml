@@ -14,6 +14,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: write
 
 jobs:
   build:
@@ -35,19 +36,35 @@ jobs:
       - name: Build debug APK
         run: |
           set +e
-          ./gradlew :app:assembleDebug --no-daemon --stacktrace > build.log 2>&1
+          ./gradlew :app:assembleDebug --no-daemon > build.log 2>&1
           status=$?
           if [ $status -ne 0 ]; then
             echo "Gradle failed with exit code $status."
-            awk '/\* What went wrong:/{flag=1} flag{print; n++} n>20{exit}' build.log | while IFS= read -r line; do
-              echo "::error file=build.log::$line"
-            done
-            grep -aE "^(e:|error:)|^Caused by:|Could not (find|resolve|GET|create)" build.log | head -n 30 | while IFS= read -r line; do
-              echo "::error file=build.log::$line"
-            done
+            # Compiler errors first: they are the lines worth reading.
+            grep -aE "^(e:|error:|FAILURE:)" build.log | head -n 40
+            echo "--- context ---"
+            awk '/\* What went wrong:/{flag=1} flag{print; n++} n>12{exit}' build.log
+            if [ -n "$GH_TOKEN" ] && [ -n "$PR_NUMBER" ]; then
+              {
+                echo '### Android build failed'
+                echo '```'
+                grep -aE "^(e:|error:)" build.log | head -n 40
+                echo '```'
+                echo '<details><summary>What went wrong</summary>'
+                echo
+                echo '```'
+                awk '/\* What went wrong:/{flag=1} flag{print; n++} n>25{exit}' build.log
+                echo '```'
+                echo '</details>'
+              } > comment.md
+              gh pr comment "$PR_NUMBER" --body-file comment.md || true
+            fi
             exit $status
           fi
           tail -n 5 build.log
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
 
       - name: Run unit tests
         run: |
