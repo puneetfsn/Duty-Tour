@@ -118,6 +118,26 @@ CI fails if the committed file drifts from the sources.
 - Clearing site data or switching browsers starts empty — take a backup first.
 - Tabs are hash routes (`#/tours`, `#/tour/<id>`, `#/export`, `#/settings`), so the browser back button works.
 
+## Make the web app live
+
+The site is plain static files, so it can be hosted anywhere that serves files.
+`web/` is the site; `web/duty-tour.html` is the same app in one file.
+
+### GitHub Pages (one-time switch)
+
+1. Repo **Settings → Pages → Build and deployment → Source: GitHub Actions**.
+2. Push to `main` (or run **Deploy web app to GitHub Pages** from the Actions tab).
+
+The site then lives at `https://puneetfsn.github.io/Duty-Tour/`, and every push
+redeploys it. Note: Pages on a **private** repository needs a paid GitHub plan; on a
+free plan the Pages settings ask you to make the repo public first.
+
+### Any other host
+
+Upload the contents of `web/` (or just drag `duty-tour.html`) to Netlify Drop,
+Cloudflare Pages, or any static host. Nothing server-side is required, and no data
+is ever sent anywhere — the app is client-side only.
+
 ## Status
 
 Done: project scaffold, Room `Tour` entity + DAO, list / add-edit / detail / settings screens,

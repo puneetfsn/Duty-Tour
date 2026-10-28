@@ -23,12 +23,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # enablement: true creates the Pages site if it does not exist yet,
-      # so the first run needs no manual click in Settings.
+      # Pages itself has to be switched on once, in Settings -> Pages ->
+      # Source: GitHub Actions. The Arena GitHub integration has no Pages
+      # permission, so it cannot create the site on your behalf.
       - name: Configure Pages
         uses: actions/configure-pages@v5
-        with:
-          enablement: true
 
       - name: Assemble static site
         run: |
