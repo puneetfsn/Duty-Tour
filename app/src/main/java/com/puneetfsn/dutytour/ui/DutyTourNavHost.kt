@@ -21,11 +21,13 @@ import com.puneetfsn.dutytour.ui.settings.SettingsViewModel
 object Routes {
     const val LIST = "tours"
     const val DETAIL = "tour/{tourId}"
-    const val EDIT = "tour/edit?tourId={tourId}"
+    // Edited tours live on their own path segment so "tour/edit" can never be
+    // mistaken for "tour/{tourId}" by the navigation matcher.
+    const val EDIT = "tour-edit?tourId={tourId}"
     const val SETTINGS = "settings"
 
     fun detail(tourId: Long) = "tour/$tourId"
-    fun edit(tourId: Long?) = "tour/edit?tourId=${tourId ?: -1L}"
+    fun edit(tourId: Long?) = "tour-edit?tourId=${tourId ?: -1L}"
 }
 
 @Composable
