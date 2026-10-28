@@ -110,13 +110,14 @@ class TourPdfWriter {
 
     // ---------------------------------------------------------------- sheets
 
+    /** One open page plus its vertical cursor. */
+    private class Sheet(val page: PdfDocument.Page, val canvas: Canvas, var y: Float)
+
     /** Tracks the current sheet and its vertical cursor, opening sheets as needed. */
     private inner class Sheets(
         private val document: PdfDocument,
         private val settings: AppSettings
     ) {
-        private class Sheet(val page: PdfDocument.Page, val canvas: Canvas, var y: Float)
-
         private var sheet: Sheet
         private var pageNumber = document.pages.size + 1
 
