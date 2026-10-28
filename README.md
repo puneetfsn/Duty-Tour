@@ -83,6 +83,21 @@ single / all / date-range sheets):
 cd web && npm install && npm test
 ```
 
+### One file, no server
+
+`web/duty-tour.html` is a single self-contained build — CSS and JS inlined, no
+external requests. Copy it to a laptop or phone and open it directly (`file://`);
+it keeps working with no server and no internet. Data stays in that browser's
+`localStorage`, and printing to PDF works the same.
+
+Regenerate it after editing the sources:
+
+```bash
+cd web && npm run build:single
+```
+
+CI fails if the committed file drifts from the sources.
+
 ### What it does
 
 - Same fields as the Android app, with a live total.
@@ -124,6 +139,7 @@ app/src/main/java/com/puneetfsn/dutytour/
   ui/common/       shared Compose pieces
   util/            Money (paise), Dates
 web/               static web app: index.html, styles.css, app.js
-web/tests/         jsdom smoke test
+web/duty-tour.html single-file build (open with no server)
+web/build-single.mjs, web/tests/   build script + jsdom smoke test
 .github/workflows/android-debug.yml
 ```

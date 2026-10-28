@@ -35,3 +35,14 @@ jobs:
 
       - name: Run smoke test
         run: npm test
+
+      # The single-file build is committed so it can be opened without a server;
+      # fail the build if it drifts from index.html / styles.css / app.js.
+      - name: Check single-file build is current
+        run: |
+          npm run build:single
+          if ! git diff --quiet -- duty-tour.html; then
+            echo "::error file=web/duty-tour.html::duty-tour.html is stale. Run 'cd web && npm run build:single' and commit the result."
+            git diff --stat -- duty-tour.html
+            exit 1
+          fi
