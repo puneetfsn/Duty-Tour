@@ -368,13 +368,7 @@
                 (d.travelMode === mode ? 'true' : 'false') + '">' + mode + '</button>';
             }).join('') +
           '</div>' +
-          '<div class="grid-money">' +
-            '<div class="field">' +
-              '<label for="travelAmount">Travel amount</label>' +
-              '<input id="travelAmount" name="travelAmount" type="text" inputmode="decimal" autocomplete="off" value="' + esc(d.travelAmountText) + '" placeholder="0.00" />' +
-            '</div>' +
-            '<div class="field"></div>' +
-          '</div>' +
+          '<div class="grid-money">' + field('travelAmount', 'Travel amount', d.travelAmountText, 'text', 'Rupees and paise, e.g. 1200.50') + '</div>' +
           field('travelNote', 'Note (optional)', d.travelNote, 'text', 'PNR, cab number, anything useful') +
         '</div>' +
 

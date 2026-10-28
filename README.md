@@ -76,6 +76,13 @@ Open `web/index.html` in a browser, or serve the folder:
 cd web && python3 -m http.server 8000
 ```
 
+Run the smoke test (jsdom; walks every screen, submits the form, and renders the
+single / all / date-range sheets):
+
+```bash
+cd web && npm install && npm test
+```
+
 ### What it does
 
 - Same fields as the Android app, with a live total.
@@ -117,5 +124,6 @@ app/src/main/java/com/puneetfsn/dutytour/
   ui/common/       shared Compose pieces
   util/            Money (paise), Dates
 web/               static web app: index.html, styles.css, app.js
+web/tests/         jsdom smoke test
 .github/workflows/android-debug.yml
 ```

@@ -114,6 +114,8 @@ body { min-height: 100vh; }
 
 /* ---------- Banner ---------- */
 
+.banner[hidden] { display: none; }
+
 .banner {
   display: flex;
   flex-wrap: wrap;
@@ -213,6 +215,7 @@ body { min-height: 100vh; }
 .tour-main { flex: 1; min-width: 0; }
 
 .tour-route {
+  display: block;
   font-size: 1.02rem;
   font-weight: 600;
   white-space: nowrap;
@@ -221,6 +224,7 @@ body { min-height: 100vh; }
 }
 
 .tour-meta {
+  display: block;
   color: var(--ink-soft);
   font-size: 0.82rem;
   white-space: nowrap;
@@ -358,7 +362,7 @@ input[type="date"] { min-height: 40px; }
 
 .grid-money {
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: minmax(0, 320px);
   gap: 0 16px;
 }
 
@@ -602,7 +606,7 @@ input[type="date"] { min-height: 40px; }
     font-size: 84pt;
     font-weight: 700;
     letter-spacing: 0.02em;
-    color: rgba(31, 58, 52, 0.075);
+    color: rgba(31, 58, 52, 0.05);
     transform: rotate(-33deg);
     white-space: nowrap;
     -webkit-print-color-adjust: exact;
