@@ -52,6 +52,7 @@ window.localStorage.setItem('duty-tour:v1:settings', JSON.stringify({
   travellerName: 'Puneet', defaultCity: 'Delhi', watermark: true, watermarkText: 'Hendrickson'
 }));
 
+
 window.eval(js);
 
 function route(hash) {
@@ -107,6 +108,7 @@ check('sheet lists four cost heads',
   sheet.includes('Work charged') && sheet.includes('Others'));
 check('sheet total includes work charged', sheet.includes('8,745.50'));
 check('sheet carries footer', sheet.includes('Personal duty-tour record. Not a GST invoice.'));
+check('sheet has an approval strip', sheet.includes('Submitted by') && sheet.includes('Approved by'));
 check('sheet has watermark', sheet.includes('sheet-watermark'));
 
 // ---------------------------------------------------------------- all-tours sheet

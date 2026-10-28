@@ -45,7 +45,7 @@
     return {
       travellerName: typeof raw.travellerName === 'string' ? raw.travellerName : '',
       defaultCity: typeof raw.defaultCity === 'string' ? raw.defaultCity : '',
-      watermark: raw.watermark !== false,
+      watermark: raw.watermark === true,
       // Custom watermark text. Empty means "print no watermark at all".
       watermarkText: typeof raw.watermarkText === 'string' ? raw.watermarkText : DEFAULT_WATERMARK
     };
@@ -1143,6 +1143,11 @@
         '</table>' +
 
         work +
+
+        '<div class="doc-approval">' +
+          '<div><span>Submitted by</span>' + esc(traveller || '____________________') + '</div>' +
+          '<div><span>Approved by</span>____________________</div>' +
+        '</div>' +
       '</div>' +
       '<div class="doc-foot">' +
         '<span>Personal duty-tour record. Not a GST invoice.</span>' +

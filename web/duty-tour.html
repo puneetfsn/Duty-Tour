@@ -728,6 +728,24 @@ input[type="date"] { min-height: 40px; }
   .doc-work .work-title { font-size: 10.5pt; font-weight: 600; margin: 0 0 3px; }
   .doc-work .work-body { font-size: 9.5pt; white-space: pre-wrap; margin: 0; }
 
+  .doc-approval {
+    margin-top: 18px;
+    padding-top: 8px;
+    border-top: 0.5pt solid #ccc;
+    display: flex;
+    gap: 24px;
+    font-size: 9pt;
+    color: #222;
+  }
+  .doc-approval div { flex: 1; }
+  .doc-approval span {
+    color: #666;
+    margin-right: 8px;
+    font-size: 8pt;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
   .doc-foot {
     position: absolute;
     bottom: 0;
@@ -825,7 +843,7 @@ input[type="date"] { min-height: 40px; }
     return {
       travellerName: typeof raw.travellerName === 'string' ? raw.travellerName : '',
       defaultCity: typeof raw.defaultCity === 'string' ? raw.defaultCity : '',
-      watermark: raw.watermark !== false,
+      watermark: raw.watermark === true,
       // Custom watermark text. Empty means "print no watermark at all".
       watermarkText: typeof raw.watermarkText === 'string' ? raw.watermarkText : DEFAULT_WATERMARK
     };
@@ -1923,6 +1941,11 @@ input[type="date"] { min-height: 40px; }
         '</table>' +
 
         work +
+
+        '<div class="doc-approval">' +
+          '<div><span>Submitted by</span>' + esc(traveller || '____________________') + '</div>' +
+          '<div><span>Approved by</span>____________________</div>' +
+        '</div>' +
       '</div>' +
       '<div class="doc-foot">' +
         '<span>Personal duty-tour record. Not a GST invoice.</span>' +

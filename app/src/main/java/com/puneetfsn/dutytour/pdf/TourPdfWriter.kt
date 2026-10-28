@@ -73,6 +73,8 @@ class TourPdfWriter {
     private val bodyPaint = paint(9.5f, INK)
     private val footerPaint = paint(7.8f, SOFT)
     private val footerRightPaint = paint(7.8f, SOFT, align = Paint.Align.RIGHT)
+    private val approvalLabelPaint = paint(8.5f, SOFT)
+    private val approvalValuePaint = paint(9f, INK)
 
     private val ledgerRule = Paint().apply {
         isAntiAlias = true
@@ -159,6 +161,7 @@ class TourPdfWriter {
         drawRouteAndMeta(sheets, tour, settings)
         drawSpendTable(sheets, tour)
         drawWorkDone(sheets, tour)
+        drawApproval(sheets, settings)
         sheets.close()
     }
 
@@ -306,6 +309,35 @@ class TourPdfWriter {
                 sheets.y += 13.5f
             }
         }
+    }
+
+    /**
+     * A slip for accounts needs somewhere to be signed. Two plain lines, no
+     * decorative boxes, sitting just above the footer.
+     */
+    private fun drawApproval(sheets: Sheets, settings: AppSettings) {
+        sheets.ensure(58f)
+        sheets.y += 16f
+        sheets.canvas.drawLine(MARGIN, sheets.y, PAGE_WIDTH - MARGIN, sheets.y, hairline)
+        sheets.y += 16f
+
+        sheets.canvas.drawText("Submitted by", MARGIN, sheets.y, approvalLabelPaint)
+        sheets.canvas.drawText(
+            settings.travellerName.ifBlank { "____________________" },
+            MARGIN + 74f,
+            sheets.y,
+            approvalValuePaint
+        )
+
+        val approvedX = MARGIN + CONTENT_WIDTH * 0.52f
+        sheets.canvas.drawText("Approved by", approvedX, sheets.y, approvalLabelPaint)
+        sheets.canvas.drawText(
+            "____________________",
+            approvedX + 74f,
+            sheets.y,
+            approvalValuePaint
+        )
+        sheets.y += 14f
     }
 
     // ---------------------------------------------------------------- text

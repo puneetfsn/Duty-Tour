@@ -117,6 +117,14 @@ class PdfContentTest {
     }
 
     @Test
+    fun sheet_text_is_stable_for_approval() {
+        // These strings are what accounts look for; keep them literal.
+        assertEquals("DUTY TOUR", PdfContent.TITLE)
+        assertEquals("Hendrickson", PdfContent.COMPANY)
+        assertEquals("Personal duty-tour record. Not a GST invoice.", PdfContent.FOOTER)
+    }
+
+    @Test
     fun file_name_is_safe_and_recognisable() {
         assertEquals("Duty-Tour-Jaipur-2024-10-04.pdf", PdfContent.fileName(full))
         val messy = full.copy(destination = "Sri Ganganagar / Plant #2")
