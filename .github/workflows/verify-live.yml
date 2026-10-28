@@ -1,0 +1,59 @@
+name: Verify live site
+
+# Confirms the deployed Pages site really serves the app: fetches it the way a
+# browser would and checks for the pieces that matter. Runs on every deploy, and
+# on demand from the Actions tab.
+on:
+  push:
+    branches: [main, "arena/**"]
+    paths:
+      - "web/**"
+      - ".github/workflows/verify-live.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    steps:
+      # Pages needs a moment after the deploy job reports success.
+      - name: Wait for Pages to publish
+        run: sleep 25
+
+      - name: Fetch the live site
+        run: |
+          set -uo pipefail
+          BASE="https://puneetfsn.github.io/Duty-Tour"
+
+          code=000
+          for attempt in 1 2 3 4 5 6; do
+            code=$(curl -sS -o index.html -w '%{http_code}' "$BASE/" || echo 000)
+            echo "index attempt $attempt: HTTP $code"
+            [ "$code" = "200" ] && break
+            sleep 15
+          done
+          if [ "$code" != "200" ]; then
+            echo "::error title=Live site unreachable::$BASE/ returned HTTP $code"
+            exit 1
+          fi
+          echo "index bytes: $(wc -c < index.html)"
+
+          curl -sS -o app.js      -w 'app.js        HTTP %{http_code}\n' "$BASE/app.js"
+          curl -sS -o styles.css  -w 'styles.css    HTTP %{http_code}\n' "$BASE/styles.css"
+          curl -sS -o single.html -w 'duty-tour.html HTTP %{http_code}\n' "$BASE/duty-tour.html"
+
+          fail() { echo "::error title=Live site check::$1"; exit 1; }
+
+          grep -q 'Duty Tour' index.html   || fail "index.html is not the Duty Tour page"
+          grep -q 'Hendrickson' index.html || fail "company line missing from index.html"
+
+          # The deployed JS must be the current build, not a stale cache.
+          grep -q 'Work charged'  app.js || fail "deployed app.js has no work-charged line"
+          grep -q 'Approved by'   app.js || fail "deployed app.js has no approval strip"
+          grep -q 'watermarkText' app.js || fail "deployed app.js has no watermark wording setting"
+          grep -q 'DUTY TOUR'     app.js || fail "deployed app.js has no PDF title"
+          grep -q 'sheet-watermark' styles.css || fail "deployed styles.css has no watermark styles"
+
+          echo "::notice title=Live site OK::$BASE/ is serving the current build (index, app.js, styles.css, duty-tour.html all HTTP 200)."
