@@ -9,6 +9,7 @@ enum class TravelMode(val label: String) {
     BUS("Bus"),
     CAB("Cab"),
     FLIGHT("Flight"),
+    BIKE("Bike"),
     OTHER("Other")
 }
 

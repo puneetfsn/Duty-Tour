@@ -97,7 +97,7 @@ fun TourEditScreen(
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = "Total".uppercase(),
+                            text = "Total expense".uppercase(),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -172,6 +172,37 @@ fun TourEditScreen(
                 )
             }
 
+            // ---- Work done -----------------------------------------------------
+            SectionLabel("Work done")
+            OutlinedTextField(
+                value = form.workTitle,
+                onValueChange = { value -> viewModel.update { it.copy(workTitle = value) } },
+                label = { Text("Short title") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(Modifier.height(12.dp))
+            OutlinedTextField(
+                value = form.workDetails,
+                onValueChange = { value -> viewModel.update { it.copy(workDetails = value) } },
+                label = { Text("Details") },
+                minLines = 4,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(Modifier.height(12.dp))
+            AmountField(
+                value = form.workAmount,
+                onValueChange = { value -> viewModel.update { it.copy(workAmount = value) } },
+                label = "Work charged amount"
+            )
+            Text(
+                text = "Charged for this work. Added to the total as its own line on the PDF.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            QuietDivider()
+
             // ---- Travel spend -------------------------------------------------
             SectionLabel("Travel spend")
             Row(
@@ -245,36 +276,8 @@ fun TourEditScreen(
             )
 
             QuietDivider()
-            LiveTotal(form)
 
-            // ---- Work done -----------------------------------------------------
-            SectionLabel("Work done")
-            OutlinedTextField(
-                value = form.workTitle,
-                onValueChange = { value -> viewModel.update { it.copy(workTitle = value) } },
-                label = { Text("Short title") },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(Modifier.height(12.dp))
-            OutlinedTextField(
-                value = form.workDetails,
-                onValueChange = { value -> viewModel.update { it.copy(workDetails = value) } },
-                label = { Text("Details") },
-                minLines = 4,
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(Modifier.height(12.dp))
-            AmountField(
-                value = form.workAmount,
-                onValueChange = { value -> viewModel.update { it.copy(workAmount = value) } },
-                label = "Work charged amount"
-            )
-            Text(
-                text = "Charged for this work. Added to the total as its own line on the PDF.",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            LiveTotal(form)
 
             if (error != null) {
                 Spacer(Modifier.height(12.dp))
@@ -363,7 +366,7 @@ private fun LiveTotal(form: TourForm) {
                 .padding(vertical = 2.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text("Total", style = MaterialTheme.typography.titleSmall)
+            Text("Total expense", style = MaterialTheme.typography.titleSmall)
             Text(
                 Money.format(form.totalPaise),
                 style = MaterialTheme.typography.titleMedium
