@@ -30,6 +30,10 @@ jobs:
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
+        with:
+          # Read no cached Gradle home this once (a cache written by two
+          # concurrent builds went bad); write a fresh one for later runs.
+          cache-write-only: true
 
       # Build errors are echoed back as workflow annotations, so a failure is
       # readable from the run summary without downloading the full log.
@@ -42,6 +46,9 @@ jobs:
             echo "Gradle failed with exit code $status."
             # Compiler errors first: they are the lines worth reading.
             grep -aE "^(e:|error:|FAILURE:)" build.log | head -n 40
+            grep -aE "^(e:|error:|FAILURE:)" build.log | head -n 20 | while IFS= read -r line; do
+              echo "::error::$line"
+            done
             echo "--- context ---"
             awk '/\* What went wrong:/{flag=1} flag{print; n++} n>12{exit}' build.log
             if [ -n "$GH_TOKEN" ] && [ -n "$PR_NUMBER" ]; then

@@ -18,6 +18,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -148,6 +149,24 @@ fun SettingsScreen(
                 enabled = settings.watermarkEnabled,
                 supportingText = { Text("Blank means no watermark. Saved with Save above.") },
                 modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(Modifier.height(12.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FilterChip(
+                    selected = settings.watermarkAlign != "center",
+                    onClick = { viewModel.setWatermarkAlign("diagonal") },
+                    label = { Text("Diagonal") }
+                )
+                FilterChip(
+                    selected = settings.watermarkAlign == "center",
+                    onClick = { viewModel.setWatermarkAlign("center") },
+                    label = { Text("Center") }
+                )
+            }
+            Text(
+                text = "Diagonal tilts across the sheet; Center sits horizontal in the middle.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             QuietDivider()

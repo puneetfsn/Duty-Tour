@@ -143,6 +143,24 @@ check('custom watermark wording printed', markBlock.includes('Internal review'),
 check('company watermark replaced, not doubled', !markBlock.includes('Hendrickson'), markBlock);
 check('custom watermark shrinks for long text', /font-size:\d+pt/.test(customMark));
 
+// ---------------------------------------------------------------- watermark alignment
+out = route('#/settings');
+check('settings offers both alignments',
+  out.includes('id="wmAlignDiagonal"') && out.includes('id="wmAlignCenter"'));
+window.document.getElementById('wmAlignCenter').dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
+route('#/tour/a1');
+window.document.querySelector('[data-print-one]').dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
+const centerMark = window.document.getElementById('print-root').innerHTML;
+check('center alignment reaches the sheet', centerMark.includes('sheet-watermark center'),
+  centerMark.match(/sheet-watermark[^"]*/)?.[0]);
+route('#/settings');
+window.document.getElementById('wmAlignDiagonal').dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
+route('#/tour/a1');
+window.document.querySelector('[data-print-one]').dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
+const diagMark = window.document.getElementById('print-root').innerHTML;
+check('diagonal alignment restores default', diagMark.includes('class="sheet-watermark"'),
+  diagMark.match(/sheet-watermark[^"]*/)?.[0]);
+
 // ---------------------------------------------------------------- blank watermark = none
 route('#/settings');
 const blankMark = window.document.getElementById('watermarkText');
