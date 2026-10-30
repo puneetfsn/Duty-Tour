@@ -769,7 +769,7 @@ input[type="date"] { min-height: 40px; }
   width: 28px;
   height: 28px;
   border-radius: 9px;
-  background: #1a3932 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 18c6 0 4-6 8-6s2-4 4-4' fill='none' stroke='%23FBFAF7' stroke-width='2.2' stroke-linecap='round'/%3E%3Ccircle cx='6' cy='18' r='2.4' fill='%23FBFAF7'/%3E%3Ccircle cx='18' cy='8' r='2.6' fill='%23E4B363'/%3E%3C/svg%3E") center / 18px no-repeat;
+  background: #0b352a url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='9' cy='8.6' r='3' fill='%23E4B363'/%3E%3Cpath d='M2.5 15.5l4.5-5.5 3 3 3.5-4.5 4.5 5.5' fill='none' stroke='%232E5B4F' stroke-width='1.7' stroke-linejoin='round'/%3E%3Cpath d='M7 19.5c5 0 3.2-5 7.2-5 2.6 0 2.2-2.6 3.8-3.4' fill='none' stroke='%23FBFAF7' stroke-width='2' stroke-linecap='round'/%3E%3Ccircle cx='7' cy='19.5' r='2' fill='%23FBFAF7'/%3E%3Cpath d='M18 11.2c-1.8-2.4-1.8-3.6 0-6 1.8 2.4 1.8 3.6 0 6z' fill='%23E4B363'/%3E%3C/svg%3E") center / 18px no-repeat;
   box-shadow: var(--shadow);
 }
 
