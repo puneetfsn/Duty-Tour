@@ -14,6 +14,7 @@
   <meta name="color-scheme" content="light dark" />
   <meta name="description" content="Duty Tour — a private, on-device tour log for Hendrickson." />
   <title>Duty Tour — Hendrickson</title>
+  <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAIAAAD8GO2jAAAEkklEQVR42o1WTWwVVRQ+373TmXnD6+uDVvRJWqqtjVISKFrFxEQMUgkbS2KKMaiIRolWF/6EBHWhJmWnxmVZSGIixoWJGn8WmrCioGloDAmFUGkrpUhabctr38/M3ONi5s2beTOvdRYzd2buPT/fOec7B7md2wkgIlD1YiIiAvwVe38BYq78oMo6OOof8r9770yiRmh4Eax8RZWTxBzZzczeFyYOW0BExFrIwuBJca0RzyisjcInEVhQuQTVkYiodITuFF0jbHHtBmi159a6/L0AMUkwACJyFccN9RRrq4gHxXAL4swMYKmkSg4JUJMpRB0xop58jkERBheg5ZLa25X6+tmN7+/OSkEuJznqxQAxwxGPcAhmIZAv8a4O4/OBlpLDh3vTH/VlV8rKdwIIh0WEQ446EMWhK9iqv9s6M1Ua+GRm8Nt/9nRZaUO4quI8V6UK4kjoEMnFpCIgIqIGidGZcs+dxqG9G155KH1htpwvsZSIWyQbW3NI8iCsCVGnmMjUcOGGvadr3eAu6zZTHvlmfr6gdAGO5bXwio8pOUQxcCCElEI2aNJW/MwXk5OLmbd+Wh69Vkrrwg17WckGrW6mR2MgAAArxWKhWHRdVwhh6vr+Jw9wz8DPn73YZMLlZJs0ivJaQrEQEcFx3fzySvc9nTu2dHe1t3e2bb67rU0K8frxofzy4rqUpZRCVVCFTZgRsGk9iADYjmPqxqfH3tuxdev0zLW/Zq9fnpoau3hxZOx82bbTlqWUSmAYgJi1NaEHsFIonvjgw6ZMZvfzB/+eny/bNogMXU9blt7QoJTyBUdg8F+0VWjHc9Vx3Exj+tHe3v7B1yauXNnc3i6EYGbHdZVSFds5Zr9P6bKxNUerFpqUcvFWvmX9hrdfenn65s3p2es35+cd1zV0XTEDqCIMUKyMZCZBQQ39sK7rv4ycEcCbLxw+1L//kfsfWFxaGp+8auh6TQHW1g2RTIcUxMMbtERd10+fO/fl99/9cWm8OZs9duTVjGX9evasaRjMHDjBcSbO7ewhEGLtDEDZtjUppZTMBEDTpFJqpVCYu3Fj+7ZtI6e+evDAwOzcnKHrHGRRjOE1T7p/D7m7Uize0dKycOvWYj4vAFcpx3EVK1PX771vyxvPHbo8OTm3sNCgaWEP4ohpvu1czQEhxFI+//S+fUPvvDs69vvxE8OmYWYbGzfdvrGr/a4tHZ2bcrnxiYmDR4+WbdvU9YgCoEaHFnKHfe8A23Ge6nuieX1z32OPd7S2FUrFsu38u7R0dWbm1I8/jIydv3T1T8u0qtI5UgSIUAUzAeHcYmbTMD4+eTKTbT47+tvQ8LAQKJXLxVLJcV1NSiuV2tC0npkVKwSwcGxQ8GTmHu6pqq046PEaiBxXpUxDCCEAIfwRRCnFnNzlE8guseUqZiuVYmYQ2JunmFzX/f/DRwCJVo8hvMxTxJUM5jXGmZo5M9z0V+k2kXkLCaZwdTxFjXRvIZgYNZYACb3eq+pkR7xC5UQ+Fv4MUAWOA5ao2lhvVq1uTA4DEwtvCATFpuVIR6PgSxgc0BpDGzH9B+p7GvcLdNdbAAAAAElFTkSuQmCC" />
   <style>
 /* Duty Tour — quiet company file: paper, ink, ledger green. No gradients, no noise. */
 
@@ -764,6 +765,87 @@ input[type="date"] { min-height: 40px; }
   table.summary-table td.num, table.summary-table th.num { text-align: right; }
   table.summary-table tr.grand td { font-weight: 700; border-top: 1pt solid #1f3a34; }
 }
+
+/* ================= Polish layer (visual refinement only) ================= */
+
+::selection { background: var(--ledger-soft); }
+
+.topbar {
+  background: var(--paper);
+  background: color-mix(in srgb, var(--paper) 86%, transparent);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border-bottom-color: color-mix(in srgb, var(--rule) 80%, transparent);
+}
+
+.brand-title { display: flex; align-items: center; gap: 10px; }
+.brand-title::before {
+  content: "";
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  background: #1a3932 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 18c6 0 4-6 8-6s2-4 4-4' fill='none' stroke='%23FBFAF7' stroke-width='2.2' stroke-linecap='round'/%3E%3Ccircle cx='6' cy='18' r='2.4' fill='%23FBFAF7'/%3E%3Ccircle cx='18' cy='8' r='2.6' fill='%23E4B363'/%3E%3C/svg%3E") center / 18px no-repeat;
+  box-shadow: var(--shadow);
+}
+
+.page-title { font-size: 1.45rem; letter-spacing: -0.015em; }
+
+.card {
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(20, 20, 24, 0.05), 0 6px 18px rgba(20, 20, 24, 0.05);
+}
+
+.tour-row {
+  border-radius: 12px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+.tour-row:hover {
+  border-color: var(--ledger);
+  box-shadow: 0 4px 16px rgba(20, 20, 24, 0.09);
+  transform: translateY(-1px);
+}
+.tour-route { letter-spacing: -0.01em; }
+.tour-total { color: var(--ledger); font-size: 1.04rem; }
+
+.btn {
+  transition: filter 0.15s ease, box-shadow 0.15s ease, transform 0.06s ease;
+  box-shadow: var(--shadow);
+}
+.btn:active { transform: translateY(1px); }
+.btn.ghost { box-shadow: none; }
+.btn.ghost:hover { background: var(--ledger-soft); }
+.btn.quiet:hover { background: var(--ledger-soft); color: var(--ledger); }
+
+.chip { transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease; }
+.chip:hover { border-color: var(--ledger); color: var(--ledger); }
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--ledger);
+  box-shadow: 0 0 0 3px var(--ledger-soft);
+}
+
+.section-title { display: flex; align-items: center; gap: 9px; }
+.section-title::before {
+  content: "";
+  flex: none;
+  width: 14px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--ledger);
+}
+
+.sticky-total {
+  border-radius: 12px;
+  box-shadow: 0 -4px 18px rgba(20, 20, 24, 0.08);
+}
+.sticky-total .value { color: var(--ledger); }
+
+.empty { text-align: center; }
+.empty p { margin-inline: auto; }
+
+.tabs a { transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease; }
   </style>
 </head>
 <body>
