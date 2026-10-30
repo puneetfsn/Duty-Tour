@@ -210,6 +210,13 @@ form2.dispatchEvent(new window.Event('submit', { bubbles: true, cancelable: true
 check('validation message', window.document.getElementById('form-error').textContent.includes('Start location'),
   window.document.getElementById('form-error').textContent);
 
+// ---------------------------------------------------------------- bike mode + form order
+out = route('#/tour/new');
+check('form offers Bike mode', out.includes('>Bike</button>'), out.match(/data-mode="[^"]+"/g));
+check('work done precedes travel spend', out.indexOf('Work done') < out.indexOf('Travel spend'),
+  [out.indexOf('Work done'), out.indexOf('Travel spend')]);
+check('breakdown ends with Total expense', out.includes('Total expense'));
+
 let failed = 0;
 for (const c of checks) {
   if (!c.ok) failed++;

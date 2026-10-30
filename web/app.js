@@ -15,7 +15,7 @@
   var DEFAULT_WATERMARK = COMPANY;
   var STORE_TOURS = 'duty-tour:v1:tours';
   var STORE_SETTINGS = 'duty-tour:v1:settings';
-  var TRAVEL_MODES = ['Train', 'Bus', 'Cab', 'Flight', 'Other'];
+  var TRAVEL_MODES = ['Train', 'Bus', 'Cab', 'Flight', 'Bike', 'Other'];
 
   // ------------------------------------------------------------------ storage
 
@@ -369,6 +369,19 @@
         '</div>' +
 
         '<div class="section">' +
+          '<p class="section-title">Work done</p>' +
+          field('workTitle', 'Short title', d.workTitle, 'text', '') +
+          '<div class="field">' +
+            '<label for="workDetails">Details</label>' +
+            '<textarea id="workDetails" name="workDetails" rows="5">' + esc(d.workDetails) + '</textarea>' +
+          '</div>' +
+          '<div class="grid-money">' +
+            field('workAmount', 'Work charged amount', d.workAmountText, 'text',
+              'Charged for this work. Added to the total as its own line.') +
+          '</div>' +
+        '</div>' +
+
+        '<div class="section">' +
           '<p class="section-title">Travel spend</p>' +
           '<div class="chips" role="group" aria-label="Travel mode">' +
             TRAVEL_MODES.map(function (mode) {
@@ -398,19 +411,6 @@
         '</div>' +
 
         '<div class="section">' +
-          '<p class="section-title">Work done</p>' +
-          field('workTitle', 'Short title', d.workTitle, 'text', '') +
-          '<div class="field">' +
-            '<label for="workDetails">Details</label>' +
-            '<textarea id="workDetails" name="workDetails" rows="5">' + esc(d.workDetails) + '</textarea>' +
-          '</div>' +
-          '<div class="grid-money">' +
-            field('workAmount', 'Work charged amount', d.workAmountText, 'text',
-              'Charged for this work. Added to the total as its own line.') +
-          '</div>' +
-        '</div>' +
-
-        '<div class="section">' +
           '<p class="section-title">Traveller on this entry</p>' +
           field('traveller', 'Name printed on the PDF', d.traveller, 'text',
             'Defaults to the name saved in Settings, and can differ per entry.') +
@@ -421,7 +421,7 @@
 
         '<div class="sticky-total">' +
           '<div>' +
-            '<div class="label">Total</div>' +
+            '<div class="label">Total expense</div>' +
             '<div class="value" id="sticky-total">' + money(draftTotal()) + '</div>' +
           '</div>' +
           '<button type="submit" form="tour-form" class="btn">Save tour</button>' +
@@ -451,7 +451,7 @@
       line('Hotel cost', hotel) +
       line('Work charged', work) +
       line('Others', other) +
-      '<div class="total-line grand"><span>Total</span><span>' +
+      '<div class="total-line grand"><span>Total expense</span><span>' +
         money(travel + hotel + work + other) + '</span></div>';
 
     function line(label, paise) {
