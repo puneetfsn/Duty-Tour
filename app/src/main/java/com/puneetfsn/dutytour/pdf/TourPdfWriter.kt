@@ -202,6 +202,9 @@ class TourPdfWriter {
 
         val markPaint = paint(84f, LEDGER, bold = true)
         markPaint.alpha = WATERMARK_ALPHA
+        // Centre the mark on the page; without this the text starts at the
+        // middle and runs right, which reads as off-centre.
+        markPaint.textAlign = Paint.Align.CENTER
         val maxWidth = PAGE_WIDTH * 1.15f
         var size = 84f
         while (size > 20f && markPaint.measureText(text) > maxWidth) {
@@ -209,10 +212,16 @@ class TourPdfWriter {
             markPaint.textSize = size
         }
 
-        canvas.save()
-        canvas.rotate(-33f, PAGE_WIDTH / 2f, PAGE_HEIGHT / 2f)
-        canvas.drawText(text, PAGE_WIDTH / 2f, PAGE_HEIGHT / 2f + size / 3f, markPaint)
-        canvas.restore()
+        val centreX = PAGE_WIDTH / 2f
+        val baselineY = PAGE_HEIGHT / 2f + size / 3f
+        if (settings.watermarkAlign == "center") {
+            canvas.drawText(text, centreX, baselineY, markPaint)
+        } else {
+            canvas.save()
+            canvas.rotate(-33f, PAGE_WIDTH / 2f, PAGE_HEIGHT / 2f)
+            canvas.drawText(text, centreX, baselineY, markPaint)
+            canvas.restore()
+        }
     }
 
     private fun drawRouteAndMeta(sheets: Sheets, tour: Tour, settings: AppSettings) {

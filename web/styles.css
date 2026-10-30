@@ -613,6 +613,8 @@ input[type="date"] { min-height: 40px; }
     print-color-adjust: exact;
   }
 
+  .sheet-watermark.center span { transform: none; }
+
   .sheet-content { position: relative; }
 
   .doc-head {

@@ -35,6 +35,10 @@ class SettingsViewModel(
         repository.setWatermarkText(text)
     }
 
+    fun setWatermarkAlign(align: String) = viewModelScope.launch {
+        repository.setWatermarkAlign(align)
+    }
+
     companion object {
         fun factory(repository: SettingsRepository): ViewModelProvider.Factory =
             viewModelFactory { initializer { SettingsViewModel(repository) } }

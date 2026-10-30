@@ -47,7 +47,9 @@
       defaultCity: typeof raw.defaultCity === 'string' ? raw.defaultCity : '',
       watermark: raw.watermark === true,
       // Custom watermark text. Empty means "print no watermark at all".
-      watermarkText: typeof raw.watermarkText === 'string' ? raw.watermarkText : DEFAULT_WATERMARK
+      watermarkText: typeof raw.watermarkText === 'string' ? raw.watermarkText : DEFAULT_WATERMARK,
+      // Watermark placement on the sheet: 'diagonal' (default) or 'center'.
+      watermarkAlign: raw.watermarkAlign === 'center' ? 'center' : 'diagonal'
     };
   }
 
@@ -645,8 +647,8 @@
         '<p class="section-title">PDF</p>' +
         '<div class="switch-row">' +
           '<div class="switch-text">' +
-            '<strong>Diagonal watermark</strong>' +
-            '<small>A light word across each printed sheet. Your choice of wording — leave the box empty for no watermark at all.</small>' +
+            '<strong>Watermark</strong>' +
+            '<small>A light word on each printed sheet. Your wording and your placement — leave the box empty for no watermark at all.</small>' +
           '</div>' +
           '<label class="checkbox-row"><input type="checkbox" id="watermark" ' + (settings.watermark ? 'checked' : '') + ' /> <span>Show</span></label>' +
         '</div>' +
@@ -654,6 +656,14 @@
           '<label for="watermarkText">Watermark text</label>' +
           '<input id="watermarkText" type="text" autocomplete="off" maxlength="40" value="' + esc(settings.watermarkText) + '" placeholder="Leave blank for none" />' +
           '<span class="hint">Blank means no watermark. Saved with the button above.</span>' +
+        '</div>' +
+        '<div class="field" style="margin-top:14px;max-width:420px">' +
+          '<label>Alignment</label>' +
+          '<div class="chips" role="group">' +
+            '<button type="button" class="chip" id="wmAlignDiagonal" aria-pressed="' + (settings.watermarkAlign !== 'center') + '">Diagonal</button>' +
+            '<button type="button" class="chip" id="wmAlignCenter" aria-pressed="' + (settings.watermarkAlign === 'center') + '">Center</button>' +
+          '</div>' +
+          '<span class="hint">Diagonal tilts across the sheet; Center sits horizontal in the middle.</span>' +
         '</div>' +
       '</div>' +
 
@@ -950,6 +960,19 @@
       toast(watermark.checked ? 'Watermark on' : 'Watermark off');
     });
 
+    ['wmAlignDiagonal', 'wmAlignCenter'].forEach(function (id) {
+      var chip = document.getElementById(id);
+      if (chip) chip.addEventListener('click', function () {
+        settings.watermarkAlign = id === 'wmAlignCenter' ? 'center' : 'diagonal';
+        saveSettings();
+        var d = document.getElementById('wmAlignDiagonal');
+        var c = document.getElementById('wmAlignCenter');
+        if (d) d.setAttribute('aria-pressed', String(settings.watermarkAlign !== 'center'));
+        if (c) c.setAttribute('aria-pressed', String(settings.watermarkAlign === 'center'));
+        toast('Watermark alignment: ' + (settings.watermarkAlign === 'center' ? 'Center' : 'Diagonal'));
+      });
+    });
+
     var backup = document.getElementById('backup');
     if (backup) backup.addEventListener('click', downloadBackup);
 
@@ -1052,7 +1075,8 @@
     if (!text) return '';
     // Long wording shrinks so it still fits across the page.
     var size = Math.max(22, Math.min(84, Math.round(980 / text.length)));
-    return '<div class="sheet-watermark"><span style="font-size:' + size +
+    var cls = settings.watermarkAlign === 'center' ? 'sheet-watermark center' : 'sheet-watermark';
+    return '<div class="' + cls + '"><span style="font-size:' + size +
       'pt">' + esc(text) + '</span></div>';
   }
 
